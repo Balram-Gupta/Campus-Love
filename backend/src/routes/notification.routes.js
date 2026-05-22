@@ -55,4 +55,13 @@ router.put("/:id/read", requireAuth, async (req, res) => {
   res.json({ notification });
 });
 
+router.delete("/", requireAuth, async (req, res) => {
+  const filter = req.user.role === "admin"
+    ? { $or: [{ audience: "admin" }, { userId: req.user._id }] }
+    : { userId: req.user._id };
+
+  const result = await Notification.deleteMany(filter);
+  res.json({ deletedCount: result.deletedCount });
+});
+
 export default router;

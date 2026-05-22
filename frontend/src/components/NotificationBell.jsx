@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "../state/AuthContext.jsx";
 import { api, SOCKET_URL } from "../utils/api.js";
@@ -6,6 +6,7 @@ import { api, SOCKET_URL } from "../utils/api.js";
 export default function NotificationBell() {
   const { token } = useAuth();
   const [items, setItems] = useState([]);
+  const deleteTimerRef = useRef(null);
 
   useEffect(() => {
     const loadNotifications = () => {
@@ -22,12 +23,27 @@ export default function NotificationBell() {
         ...current
       ]);
     });
-    return () => socket.disconnect();
+    return () => {
+      socket.disconnect();
+      clearTimeout(deleteTimerRef.current);
+    };
   }, [token]);
+
+  function handleToggle(event) {
+    if (!event.currentTarget.open || items.length === 0) {
+      return;
+    }
+
+    clearTimeout(deleteTimerRef.current);
+    deleteTimerRef.current = setTimeout(() => {
+      api("/api/notifications", { method: "DELETE", token }).catch(() => {});
+      setItems([]);
+    }, 2000);
+  }
 
   const unread = items.filter((item) => !item.read).length;
   return (
-    <details className="relative">
+    <details className="relative" onToggle={handleToggle}>
       <summary className="btn-secondary list-none">Notifications {unread > 0 ? `(${unread})` : ""}</summary>
       <div className="absolute right-0 z-10 mt-2 w-80 rounded-lg border border-campus-line bg-white p-3 shadow-soft">
         {items.length === 0 && <p className="text-sm text-campus-muted">No notifications yet.</p>}
