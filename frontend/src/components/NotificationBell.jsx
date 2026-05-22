@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "../state/AuthContext.jsx";
-import { api } from "../utils/api.js";
+import { api, SOCKET_URL } from "../utils/api.js";
 
 export default function NotificationBell() {
   const { token } = useAuth();
@@ -13,7 +13,7 @@ export default function NotificationBell() {
     };
 
     loadNotifications();
-    const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:8000", { auth: { token } });
+    const socket = io(SOCKET_URL, { auth: { token } });
     socket.on("notification", (notification) => setItems((current) => [notification, ...current]));
     socket.on("notifications:refresh", loadNotifications);
     socket.on("announcement:new", (announcement) => {

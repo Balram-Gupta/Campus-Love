@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
-import { api, imageUrl } from "../utils/api.js";
+import { api, imageUrl, SOCKET_URL } from "../utils/api.js";
 import { useAuth } from "../state/AuthContext.jsx";
 
 export default function ChatPage() {
@@ -52,7 +52,7 @@ export default function ChatPage() {
   }, [token]);
 
   useEffect(() => {
-    socketRef.current = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:8000", { auth: { token } });
+    socketRef.current = io(SOCKET_URL, { auth: { token } });
     socketRef.current.on("message:new", (message) => {
       if (message.matchId === matchId) {
         setMessages((current) => [...current, message]);

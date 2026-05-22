@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 
 const frontendRoot = fileURLToPath(new URL(".", import.meta.url));
+const backendUrl = "https://campus-love-backend.onrender.com";
 
 export default defineConfig({
   root: frontendRoot,
@@ -13,7 +14,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": "http://localhost:8000"
+      "/api": backendUrl
     }
   }
 });

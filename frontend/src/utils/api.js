@@ -1,3 +1,6 @@
+export const BACKEND_URL = (import.meta.env.VITE_API_URL || "https://campus-love-backend.onrender.com").replace(/\/$/, "");
+export const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || BACKEND_URL;
+
 export async function api(path, { method = "GET", body, token, isForm = false } = {}) {
   const headers = {};
   if (token) {
@@ -7,7 +10,9 @@ export async function api(path, { method = "GET", body, token, isForm = false } 
     headers["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(path, {
+  const url = path.startsWith("http") ? path : `${BACKEND_URL}${path}`;
+
+  const response = await fetch(url, {
     method,
     headers,
     body: isForm ? body : body ? JSON.stringify(body) : undefined
