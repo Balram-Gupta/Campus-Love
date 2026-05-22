@@ -1,0 +1,304 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    color: #15202b;
+    background:
+      radial-gradient(circle at top left, rgba(11, 122, 117, 0.10), transparent 32rem),
+      linear-gradient(180deg, #fbfcfe 0%, #f2f6f9 100%);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply w-full rounded-lg border border-campus-line bg-white px-3 text-campus-ink outline-none focus:ring-4 focus:ring-teal-100;
+  }
+
+  input,
+  select {
+    @apply h-11;
+  }
+
+  textarea {
+    @apply py-3;
+  }
+}
+
+@layer components {
+  .auth-page {
+    @apply grid min-h-screen place-items-center bg-campus-paper p-5 text-campus-ink;
+  }
+
+  .page {
+    @apply mx-auto w-full max-w-7xl p-5 lg:p-8;
+  }
+
+  .panel {
+    @apply rounded-lg border border-campus-line bg-white p-5 shadow-sm;
+  }
+
+  .section-title {
+    @apply mb-6 max-w-3xl;
+  }
+
+  .section-title p {
+    @apply mb-1 text-xs font-black uppercase text-campus-gold;
+  }
+
+  .section-title h1 {
+    @apply mb-2 text-3xl font-black md:text-4xl;
+  }
+
+  .section-title span {
+    @apply block leading-7 text-campus-muted;
+  }
+
+  .field {
+    @apply mb-4 grid gap-2 text-sm font-bold text-campus-muted;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg border border-campus-teal bg-campus-teal px-5 font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#075e5a] hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg border border-campus-line bg-white px-5 font-black text-campus-ink shadow-sm transition hover:-translate-y-0.5 hover:border-campus-teal hover:text-campus-teal hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none;
+  }
+
+  .nav-link {
+    @apply rounded-lg border border-campus-line bg-white px-4 py-3 font-black text-campus-ink transition hover:border-campus-teal hover:text-campus-teal;
+  }
+
+  .nav-link.active {
+    @apply border-campus-teal bg-[#e1f6ef] text-[#075e5a] shadow-sm;
+  }
+
+  .admin-nav-link {
+    @apply rounded-lg border border-white/10 bg-white/5 px-4 py-3 font-black text-white/80 transition hover:bg-white/10 hover:text-white;
+  }
+
+  .admin-nav-link.active {
+    @apply border-[#d6b25f] bg-[#d6b25f] text-[#102825];
+  }
+
+  .admin-logout {
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg border border-white/20 bg-white px-5 font-black text-[#102825] transition hover:bg-[#edf7f1];
+  }
+
+  .admin-stat {
+    @apply rounded-lg border border-[#cddbd6] bg-white p-4 shadow-sm;
+  }
+
+  .admin-tab {
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg border border-[#cddbd6] bg-white px-4 font-black text-campus-muted transition hover:border-campus-teal hover:text-campus-ink;
+  }
+
+  .admin-tab.active {
+    @apply border-campus-teal bg-[#dcefea] text-[#075e5a];
+  }
+
+  .status-error {
+    @apply mb-3 rounded-lg bg-red-50 p-3 font-bold text-campus-rose;
+  }
+
+  .status-info {
+    @apply rounded-lg bg-[#e1f6ef] p-3 font-bold text-[#075e5a];
+  }
+
+  .chip {
+    @apply rounded-full border border-campus-line bg-slate-50 px-3 py-2 text-sm font-black text-slate-600;
+  }
+
+  .round-btn {
+    @apply grid h-20 w-20 place-items-center rounded-full border border-campus-line bg-white font-black shadow-soft transition hover:-translate-y-1 hover:border-campus-teal hover:text-campus-teal disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .round-btn.like {
+    @apply text-campus-rose;
+  }
+
+  .message-box {
+    @apply flex min-h-[360px] flex-col gap-3 overflow-auto rounded-lg border border-campus-line bg-[#eef3f7] p-4;
+  }
+
+  .message {
+    @apply relative max-w-[78%] rounded-2xl border p-3 shadow-sm;
+  }
+
+  .message.received {
+    @apply self-start rounded-bl-md border-campus-line bg-white text-campus-ink;
+  }
+
+  .message.sent {
+    @apply self-end rounded-br-md border-[#0b7a75] bg-campus-teal text-white;
+  }
+
+  .message p {
+    @apply mb-1 break-words leading-7;
+  }
+
+  .message span {
+    @apply block text-right text-xs font-bold;
+  }
+
+  .message.received span {
+    @apply text-campus-muted;
+  }
+
+  .message.sent span {
+    @apply text-white/80;
+  }
+
+  .empty-chat {
+    @apply m-auto max-w-sm text-center;
+  }
+
+  .empty-chat h3 {
+    @apply text-lg font-black text-campus-ink;
+  }
+
+  .empty-chat p {
+    @apply mt-2 leading-6 text-campus-muted;
+  }
+
+  .chat-composer {
+    @apply grid gap-2 rounded-2xl border border-campus-line bg-white p-2 shadow-sm md:grid-cols-[1fr_auto];
+  }
+
+  .chat-composer input {
+    @apply border-transparent bg-transparent focus:ring-0;
+  }
+
+  .call-panel {
+    @apply fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4;
+  }
+
+  .call-card {
+    @apply w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-soft;
+  }
+
+  .call-header {
+    @apply flex flex-wrap items-center justify-between gap-3 border-b border-campus-line p-4;
+  }
+
+  .call-header p {
+    @apply text-sm font-black uppercase text-campus-gold;
+  }
+
+  .call-header h3 {
+    @apply text-2xl font-black text-campus-ink;
+  }
+
+  .call-actions {
+    @apply grid gap-3 p-5 sm:grid-cols-2;
+  }
+
+  .call-stage {
+    @apply relative grid min-h-[420px] place-items-center bg-slate-950;
+  }
+
+  .remote-video {
+    @apply h-full max-h-[70vh] w-full bg-slate-950 object-contain;
+  }
+
+  .local-video {
+    @apply absolute bottom-4 right-4 h-32 w-44 rounded-lg border-2 border-white bg-slate-800 object-cover shadow-soft;
+  }
+
+  .voice-only .remote-video,
+  .voice-only .local-video {
+    @apply hidden;
+  }
+
+  .voice-call-label {
+    @apply rounded-lg bg-white px-5 py-4 text-xl font-black text-campus-ink;
+  }
+
+  .ai-chat {
+    @apply fixed bottom-5 right-5 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-3;
+  }
+
+  .ai-chat-toggle {
+    @apply grid h-14 w-14 place-items-center rounded-full border border-campus-teal bg-campus-teal font-black text-white shadow-soft transition hover:bg-[#075e5a];
+  }
+
+  .ai-chat-panel {
+    @apply grid h-[min(640px,calc(100vh-7rem))] w-[min(420px,calc(100vw-2rem))] grid-rows-[auto_auto_1fr_auto_auto] overflow-hidden rounded-lg border border-campus-line bg-white shadow-soft;
+  }
+
+  .ai-chat-header {
+    @apply flex items-center justify-between gap-3 border-b border-campus-line bg-campus-ink p-4 text-white;
+  }
+
+  .ai-chat-header p {
+    @apply text-xs font-black uppercase text-campus-gold;
+  }
+
+  .ai-chat-header h2 {
+    @apply text-xl font-black;
+  }
+
+  .ai-icon-btn {
+    @apply grid h-9 w-9 place-items-center rounded-lg border border-white/20 bg-white/10 font-black text-white transition hover:bg-white/20;
+  }
+
+  .ai-chat-context {
+    @apply flex items-center justify-between gap-3 border-b border-campus-line bg-campus-paper px-4 py-3 text-sm;
+  }
+
+  .ai-chat-context span {
+    @apply font-bold text-campus-muted;
+  }
+
+  .ai-chat-context strong {
+    @apply text-right font-black text-campus-ink;
+  }
+
+  .ai-chat-messages {
+    @apply grid content-start gap-3 overflow-auto bg-[#eef3f7] p-4;
+  }
+
+  .ai-message {
+    @apply max-w-[86%] rounded-2xl border p-3 text-sm leading-6 shadow-sm;
+  }
+
+  .ai-message.user {
+    @apply justify-self-end rounded-br-md border-[#0b7a75] bg-campus-teal text-white;
+  }
+
+  .ai-message.assistant {
+    @apply justify-self-start rounded-bl-md border-campus-line bg-white text-campus-ink;
+  }
+
+  .ai-message p {
+    @apply break-words;
+  }
+
+  .ai-message-link {
+    @apply mt-3 inline-flex min-h-9 items-center rounded-lg border border-campus-line bg-white px-3 font-black text-campus-teal transition hover:border-campus-teal;
+  }
+
+  .ai-suggestions {
+    @apply flex gap-2 overflow-x-auto border-t border-campus-line bg-white px-4 py-3;
+  }
+
+  .ai-suggestions button {
+    @apply shrink-0 rounded-full border border-campus-line bg-campus-paper px-3 py-2 text-xs font-black text-campus-ink transition hover:border-campus-teal hover:text-campus-teal;
+  }
+
+  .ai-chat-form {
+    @apply grid gap-2 border-t border-campus-line bg-white p-3 sm:grid-cols-[1fr_auto];
+  }
+
+  .ai-chat-form input {
+    @apply min-w-0;
+  }
+}
