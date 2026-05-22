@@ -126,7 +126,8 @@
   }
 
   .message-box {
-    @apply flex min-h-[360px] flex-col gap-3 overflow-auto rounded-lg border border-campus-line bg-[#eef3f7] p-4;
+    @apply flex min-h-[360px] max-h-[56vh] flex-col gap-3 overflow-y-auto overscroll-contain rounded-lg border border-campus-line bg-[#eef3f7] p-4;
+    scrollbar-gutter: stable;
   }
 
   .message {
@@ -209,12 +210,36 @@
     @apply h-full max-h-[70vh] w-full bg-slate-950 object-contain;
   }
 
-  .local-video {
-    @apply absolute bottom-4 right-4 h-32 w-44 rounded-lg border-2 border-white bg-slate-800 object-cover shadow-soft;
+  .remote-video.empty {
+    @apply opacity-20;
+  }
+
+  .call-placeholder {
+    @apply absolute inset-0 grid place-content-center gap-2 px-6 text-center text-white;
+  }
+
+  .call-placeholder h4 {
+    @apply text-2xl font-black;
+  }
+
+  .call-placeholder p {
+    @apply text-sm font-bold text-white/75;
+  }
+
+  .local-preview {
+    @apply absolute bottom-4 right-4 grid h-32 w-44 place-items-center overflow-hidden rounded-lg border-2 border-white bg-slate-800 text-center text-xs font-black text-white/80 shadow-soft;
+  }
+
+  .local-preview video {
+    @apply h-full w-full object-cover;
+  }
+
+  .local-preview.empty video {
+    @apply hidden;
   }
 
   .voice-only .remote-video,
-  .voice-only .local-video {
+  .voice-only .local-preview {
     @apply hidden;
   }
 

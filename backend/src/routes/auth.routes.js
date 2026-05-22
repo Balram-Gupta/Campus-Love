@@ -10,6 +10,27 @@ import { notifyAdmins } from "../utils/notifications.js";
 
 const router = express.Router();
 const asyncHandler = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
+const canUseDevOtpFallback = process.env.NODE_ENV !== "production" && process.env.ALLOW_DEV_OTP_FALLBACK !== "false";
+
+async function sendOtpEmail({ email, subject, text, otp }) {
+  try {
+    await sendMail({ to: email, subject, text });
+    return { message: "OTP sent. Check your email." };
+  } catch (error) {
+    if (!canUseDevOtpFallback) {
+      error.status = 502;
+      error.expose = true;
+      error.message = "Could not send OTP email. Check SMTP_USER and SMTP_PASS in backend/.env.";
+      throw error;
+    }
+
+    console.error("OTP email failed; using development fallback:", error.message);
+    return {
+      message: `Email service failed, so development OTP is ${otp}. Use this OTP to continue locally.`,
+      devOtp: otp
+    };
+  }
+}
 
 router.post("/request-registration-otp", asyncHandler(async (req, res) => {
   const email = String(req.body.email || "").toLowerCase().trim();
@@ -33,21 +54,14 @@ router.post("/request-registration-otp", asyncHandler(async (req, res) => {
     { upsert: true, setDefaultsOnInsert: true }
   );
 
-  try {
-    await sendMail({
-      to: email,
-      subject: "CampusLove email OTP",
-      text: `Your CampusLove OTP is ${otp}. It expires in 10 minutes.`
-    });
-  } catch (error) {
-    await EmailOtp.deleteOne({ email });
-    error.status = 502;
-    error.expose = true;
-    error.message = "Could not send OTP email. Check SMTP_USER and SMTP_PASS in backend/.env.";
-    throw error;
-  }
+  const otpResult = await sendOtpEmail({
+    email,
+    subject: "CampusLove email OTP",
+    text: `Your CampusLove OTP is ${otp}. It expires in 10 minutes.`,
+    otp
+  });
 
-  res.json({ message: "OTP sent. Verify your email before completing registration." });
+  res.json({ message: `${otpResult.message} Verify your email before completing registration.`, devOtp: otpResult.devOtp });
 }));
 
 router.post("/verify-registration-otp", asyncHandler(async (req, res) => {
@@ -93,21 +107,14 @@ router.post("/request-password-reset-otp", asyncHandler(async (req, res) => {
     { upsert: true, setDefaultsOnInsert: true }
   );
 
-  try {
-    await sendMail({
-      to: email,
-      subject: "CampusLove password reset OTP",
-      text: `Your CampusLove password reset OTP is ${otp}. It expires in 10 minutes.`
-    });
-  } catch (error) {
-    await EmailOtp.deleteOne({ email });
-    error.status = 502;
-    error.expose = true;
-    error.message = "Could not send OTP email. Check SMTP_USER and SMTP_PASS in backend/.env.";
-    throw error;
-  }
+  const otpResult = await sendOtpEmail({
+    email,
+    subject: "CampusLove password reset OTP",
+    text: `Your CampusLove password reset OTP is ${otp}. It expires in 10 minutes.`,
+    otp
+  });
 
-  res.json({ message: "If this email is registered, an OTP has been sent." });
+  res.json({ message: user ? otpResult.message : "If this email is registered, an OTP has been sent.", devOtp: user ? otpResult.devOtp : undefined });
 }));
 
 router.post("/reset-password", asyncHandler(async (req, res) => {

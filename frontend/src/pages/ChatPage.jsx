@@ -16,6 +16,7 @@ export default function ChatPage() {
   const [incomingCall, setIncomingCall] = useState(null);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
+  const [mediaSupport, setMediaSupport] = useState({ checked: false, audio: false, video: false, calls: false });
   const [blockedUserIds, setBlockedUserIds] = useState([]);
   const socketRef = useRef(null);
   const peerRef = useRef(null);
@@ -24,6 +25,9 @@ export default function ChatPage() {
   const remoteStreamRef = useRef(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const remoteAudioRef = useRef(null);
+  const activeCallMatchIdRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   const currentUserId = String(user?._id || user?.id || "");
 
@@ -31,11 +35,12 @@ export default function ChatPage() {
     setBlockedUserIds((user?.blockedUsers || []).map((id) => String(id)));
   }, [user?.blockedUsers]);
 
-  function attachMediaStream(videoElement, stream) {
-    if (!videoElement || videoElement.srcObject === stream) return;
-    videoElement.srcObject = stream;
+  function attachMediaStream(mediaElement, stream) {
+    if (!mediaElement || mediaElement.srcObject === stream) return;
+    mediaElement.srcObject = stream;
     if (stream) {
-      videoElement.play?.().catch(() => {});
+      mediaElement.onloadedmetadata = () => mediaElement.play?.().catch(() => {});
+      mediaElement.play?.().catch(() => {});
     }
   }
 
@@ -50,6 +55,36 @@ export default function ChatPage() {
   useEffect(() => {
     loadMatches();
   }, [token]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkMediaSupport() {
+      const supportsMedia = Boolean(navigator.mediaDevices?.getUserMedia);
+      const supportsCalls = typeof RTCPeerConnection !== "undefined" && typeof MediaStream !== "undefined";
+      const nextSupport = { checked: true, audio: supportsMedia, video: supportsMedia, calls: supportsMedia && supportsCalls };
+
+      if (supportsMedia && navigator.mediaDevices?.enumerateDevices) {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          nextSupport.audio = devices.some((device) => device.kind === "audioinput");
+          nextSupport.video = devices.some((device) => device.kind === "videoinput");
+        } catch {
+          nextSupport.audio = true;
+          nextSupport.video = true;
+        }
+      }
+
+      if (!cancelled) {
+        setMediaSupport(nextSupport);
+      }
+    }
+
+    checkMediaSupport();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     socketRef.current = io(SOCKET_URL, { auth: { token } });
@@ -112,7 +147,12 @@ export default function ChatPage() {
     attachMediaStream(localVideoRef.current, localStream);
     remoteStreamRef.current = remoteStream;
     attachMediaStream(remoteVideoRef.current, remoteStream);
+    attachMediaStream(remoteAudioRef.current, remoteStream);
   }, [localStream, remoteStream, call]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
+  }, [messages, matchId]);
 
   useEffect(() => () => endCall("", false), []);
 
@@ -130,8 +170,45 @@ export default function ChatPage() {
     await api(`/api/messages/${matchId}`, { method: "POST", token, body: { text } });
   }
 
+  function getCallUnavailableMessage(kind) {
+    if (!window.isSecureContext && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+      return "Calls need HTTPS or localhost so the browser can allow camera and microphone access.";
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      return "Calls are not supported in this browser. Try Chrome, Edge, or Firefox.";
+    }
+    if (typeof RTCPeerConnection === "undefined" || typeof MediaStream === "undefined") {
+      return "Video and voice calls are not supported in this browser.";
+    }
+    if (mediaSupport.checked && kind === "Video" && !mediaSupport.video) {
+      return "No camera was found on this device, so video call is unavailable.";
+    }
+    if (mediaSupport.checked && !mediaSupport.audio) {
+      return "No microphone was found on this device, so calls are unavailable.";
+    }
+    return "";
+  }
+
   async function getMedia(kind) {
+    const unavailableMessage = getCallUnavailableMessage(kind);
+    if (unavailableMessage) {
+      throw new Error(unavailableMessage);
+    }
+
     return navigator.mediaDevices.getUserMedia({ audio: true, video: kind === "Video" });
+  }
+
+  function getCallErrorMessage(error, action) {
+    if (error.name === "NotAllowedError") {
+      return action === "answer" ? "Allow camera and microphone permission to answer the call." : "Allow camera and microphone permission to start the call.";
+    }
+    if (error.name === "NotFoundError" || error.name === "OverconstrainedError") {
+      return "This device does not have the camera or microphone needed for this call.";
+    }
+    if (error.name === "NotReadableError") {
+      return "Your camera or microphone is already in use by another app.";
+    }
+    return error.message || (action === "answer" ? "Could not answer the call." : "Could not start the call on this device.");
   }
 
   async function addPendingIceCandidates() {
@@ -153,19 +230,22 @@ export default function ChatPage() {
 
     stream.getTracks().forEach((track) => peer.addTrack(track, stream));
     peer.ontrack = (event) => {
-      const [streamFromEvent] = event.streams;
-      if (streamFromEvent) {
-        setRemoteStream(streamFromEvent);
-        return;
-      }
       const currentRemoteStream = remoteStreamRef.current || new MediaStream();
-      currentRemoteStream.addTrack(event.track);
+      const hasTrack = currentRemoteStream.getTracks().some((track) => track.id === event.track.id);
+      if (!hasTrack) {
+        currentRemoteStream.addTrack(event.track);
+      }
       remoteStreamRef.current = currentRemoteStream;
       setRemoteStream(currentRemoteStream);
+      attachMediaStream(remoteVideoRef.current, currentRemoteStream);
+      attachMediaStream(remoteAudioRef.current, currentRemoteStream);
     };
     peer.onicecandidate = (event) => {
       if (event.candidate) {
-        socketRef.current?.emit("call:ice-candidate", { matchId, candidate: event.candidate });
+        socketRef.current?.emit("call:ice-candidate", {
+          matchId: activeCallMatchIdRef.current || matchId,
+          candidate: event.candidate
+        });
       }
     };
     peer.onconnectionstatechange = () => {
@@ -183,10 +263,13 @@ export default function ChatPage() {
     if (!canChat || call) return;
     try {
       const stream = await getMedia(kind);
+      activeCallMatchIdRef.current = matchId;
       localStreamRef.current = stream;
       setLocalStream(stream);
       attachMediaStream(localVideoRef.current, stream);
-      setRemoteStream(new MediaStream());
+      const emptyRemoteStream = new MediaStream();
+      remoteStreamRef.current = emptyRemoteStream;
+      setRemoteStream(emptyRemoteStream);
       setCall({ kind, state: "calling" });
       const peer = createPeer(stream);
       const offer = await peer.createOffer();
@@ -194,7 +277,7 @@ export default function ChatPage() {
       socketRef.current?.emit("call:offer", { matchId, offer: makeSignalDescription(offer, kind) });
       setStatus(`${kind} call ringing.`);
     } catch (error) {
-      setStatus(error.name === "NotAllowedError" ? "Allow camera and microphone permission to start the call." : "Could not start the call on this device.");
+      setStatus(getCallErrorMessage(error, "start"));
     }
   }
 
@@ -204,10 +287,13 @@ export default function ChatPage() {
     const callMatchId = incomingCall.matchId || matchId;
     try {
       const stream = await getMedia(kind);
+      activeCallMatchIdRef.current = callMatchId;
       localStreamRef.current = stream;
       setLocalStream(stream);
       attachMediaStream(localVideoRef.current, stream);
-      setRemoteStream(new MediaStream());
+      const emptyRemoteStream = new MediaStream();
+      remoteStreamRef.current = emptyRemoteStream;
+      setRemoteStream(emptyRemoteStream);
       setCall({ kind, state: "connected" });
       const peer = createPeer(stream);
       await peer.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
@@ -218,7 +304,7 @@ export default function ChatPage() {
       setIncomingCall(null);
       setStatus("Call connected.");
     } catch (error) {
-      setStatus(error.name === "NotAllowedError" ? "Allow camera and microphone permission to answer the call." : "Could not answer the call.");
+      setStatus(getCallErrorMessage(error, "answer"));
     }
   }
 
@@ -226,12 +312,14 @@ export default function ChatPage() {
     peerRef.current?.close();
     peerRef.current = null;
     pendingIceCandidatesRef.current = [];
+    activeCallMatchIdRef.current = null;
     localStreamRef.current?.getTracks().forEach((track) => track.stop());
     remoteStreamRef.current?.getTracks().forEach((track) => track.stop());
     localStreamRef.current = null;
     remoteStreamRef.current = null;
     attachMediaStream(localVideoRef.current, null);
     attachMediaStream(remoteVideoRef.current, null);
+    attachMediaStream(remoteAudioRef.current, null);
     setLocalStream(null);
     setRemoteStream(null);
     setCall(null);
@@ -250,6 +338,10 @@ export default function ChatPage() {
   const titleName = otherUser?.name || "Conversation";
   const isBlocked = Boolean(otherUser?.isBlockedByMe || otherUser?.hasBlockedMe || blockedUserIds.includes(String(otherUser?._id || "")));
   const canChat = Boolean(matchId && activeMatch && matchedOtherUser && !isBlocked);
+  const videoUnavailableMessage = getCallUnavailableMessage("Video");
+  const callsUnavailableMessage = getCallUnavailableMessage("Voice");
+  const hasRemoteVideo = Boolean(remoteStream?.getVideoTracks().some((track) => track.readyState === "live"));
+  const hasLocalVideo = Boolean(localStream?.getVideoTracks().some((track) => track.readyState === "live"));
 
   async function toggleBlockUser() {
     if (!otherUser) return;
@@ -305,8 +397,8 @@ export default function ChatPage() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button className="btn-secondary" disabled={!canChat} onClick={() => startCall("Voice")}>Voice call</button>
-              <button className="btn-secondary" disabled={!canChat} onClick={() => startCall("Video")}>Video call</button>
+              <button className="btn-secondary" disabled={!canChat} title={callsUnavailableMessage} onClick={() => startCall("Voice")}>Voice call</button>
+              <button className="btn-secondary" disabled={!canChat} title={videoUnavailableMessage} onClick={() => startCall("Video")}>Video call</button>
               <button className="btn-secondary" disabled={!otherUser} onClick={toggleBlockUser}>{isBlocked ? "Unblock" : "Block"}</button>
               <button className="btn-secondary" disabled={!otherUser} onClick={reportUser}>Report</button>
             </div>
@@ -327,6 +419,7 @@ export default function ChatPage() {
                 </article>
               );
             })}
+            <div ref={messagesEndRef} />
           </div>
           <form className="chat-composer" onSubmit={send}>
             <input name="text" placeholder="Type a message" disabled={!canChat} required />
@@ -350,8 +443,18 @@ export default function ChatPage() {
                   </div>
                 ) : (
                   <div className={`call-stage ${call.kind === "Voice" ? "voice-only" : ""}`}>
-                    <video className="remote-video" ref={remoteVideoRef} autoPlay playsInline />
-                    <video className="local-video" ref={localVideoRef} autoPlay muted playsInline />
+                    <video className={`remote-video ${hasRemoteVideo ? "" : "empty"}`} ref={remoteVideoRef} autoPlay muted playsInline />
+                    <audio ref={remoteAudioRef} autoPlay />
+                    {!hasRemoteVideo && (
+                      <div className="call-placeholder">
+                        <h4>{call.state === "calling" ? `Calling ${otherUser?.name || "your match"}...` : "Waiting for video"}</h4>
+                        <p>{call.state === "calling" ? "The video will appear after they answer." : "Audio may be connected while the camera is still unavailable."}</p>
+                      </div>
+                    )}
+                    <div className={`local-preview ${hasLocalVideo ? "" : "empty"}`}>
+                      <video ref={localVideoRef} autoPlay muted playsInline />
+                      {!hasLocalVideo && <span>No camera preview</span>}
+                    </div>
                     {call.kind === "Voice" && <div className="voice-call-label">Voice call in progress</div>}
                   </div>
                 )}

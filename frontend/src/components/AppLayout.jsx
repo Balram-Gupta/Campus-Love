@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Navigate, NavLink, Outlet } from "react-router-dom";
 import NotificationBell from "./NotificationBell.jsx";
 import { useAuth } from "../state/AuthContext.jsx";
@@ -15,6 +15,7 @@ const links = [
 export default function AppLayout() {
   const { token, user, logout } = useAuth();
   const [nearbyStatus, setNearbyStatus] = useState(localStorage.getItem("campuslove_nearby_alerts") === "on" ? "on" : "idle");
+  const lastLocationSharedAtRef = useRef(0);
 
   useEffect(() => {
     if (nearbyStatus !== "on" || !token || !navigator.geolocation) {
@@ -22,13 +23,19 @@ export default function AppLayout() {
     }
 
     const shareLocation = (position) => {
+      const now = Date.now();
+      if (now - lastLocationSharedAtRef.current < 60000) {
+        return;
+      }
+      lastLocationSharedAtRef.current = now;
       api("/api/users/location", {
         method: "POST",
         token,
         body: {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
-        }
+        },
+        timeout: 5000
       }).catch(() => {});
     };
 
