@@ -19,19 +19,26 @@ dotenv.config({ path: new URL(".env", import.meta.url) });
 
 const app = express();
 const server = http.createServer(app);
-const allowedOrigins = `${process.env.CLIENT_URL || ""},http://localhost:5173,http://127.0.0.1:5173`
+const defaultClientUrls = [
+  "https://campuslove-frontend.onrender.com",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173"
+];
+const allowedOrigins = `${process.env.CLIENT_URL || ""},${defaultClientUrls.join(",")}`
   .split(",")
-  .map((origin) => origin.trim())
+  .map((origin) => origin.trim().replace(/\/$/, ""))
   .filter(Boolean);
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    const normalizedOrigin = origin?.replace(/\/$/, "");
+    if (!normalizedOrigin || allowedOrigins.includes(normalizedOrigin)) {
       callback(null, true);
       return;
     }
     callback(new Error(`CORS blocked origin: ${origin}`));
   },
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 204
 };
 const io = new Server(server, {
   cors: corsOptions
@@ -39,6 +46,7 @@ const io = new Server(server, {
 
 app.set("io", io);
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -77,5 +85,4 @@ connectDb().then(() => {
     console.log(`CampusLove API running on port ${port}`);
   });
 });
-
 
