@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/", requireAuth, requireVerified, async (req, res) => {
   const matches = await Match.find({ users: req.user._id })
-    .populate("users", "name age department course semester profilePhoto bio interests blockedUsers")
+    .populate("users", "name age department course semester profilePhoto photos bio interests blockedUsers")
     .sort({ updatedAt: -1 })
     .lean();
 

@@ -22,11 +22,21 @@ export default function MatchesPage() {
         {matches.map((match) => {
           const currentUserId = String(user?._id || user?.id || "");
           const other = match.users.find((item) => String(item._id) !== currentUserId);
+          const photos = [other?.profilePhoto, ...(other?.photos || [])].filter(Boolean);
           return (
             <article className="panel" key={match._id}>
               <img className="h-64 w-full rounded-lg object-cover" src={imageUrl(other?.profilePhoto)} alt={other?.name} />
               <h2 className="mt-4 text-2xl font-black">{other?.name}</h2>
               <p className="font-bold text-campus-muted">{other?.department} | {other?.semester}</p>
+              {photos.length > 1 && (
+                <div className="mt-4 grid grid-cols-4 gap-2">
+                  {photos.slice(0, 8).map((photo, photoIndex) => (
+                    <a className="block overflow-hidden rounded-lg border border-campus-line bg-campus-paper" href={imageUrl(photo)} target="_blank" rel="noreferrer" key={`${photo}-${photoIndex}`}>
+                      <img className="h-20 w-full object-cover" src={imageUrl(photo)} alt={`${other?.name || "Match"} photo ${photoIndex + 1}`} />
+                    </a>
+                  ))}
+                </div>
+              )}
               <Link className="btn-primary mt-4 w-full text-center" to={`/chat/${match._id}`}>Open chat</Link>
             </article>
           );

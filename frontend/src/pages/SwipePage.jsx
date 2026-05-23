@@ -13,6 +13,12 @@ export default function SwipePage() {
   }, [token]);
 
   const current = users[index];
+  const currentPhotos = current ? [current.profilePhoto, ...(current.photos || [])].filter(Boolean) : [];
+  const [photoIndex, setPhotoIndex] = useState(0);
+
+  useEffect(() => {
+    setPhotoIndex(0);
+  }, [current?._id]);
 
   async function like() {
     if (!current) return;
@@ -44,17 +50,32 @@ export default function SwipePage() {
         </div>
       )}
       {current && (
-        <article className="mx-auto grid max-w-5xl overflow-hidden rounded-lg border border-campus-line bg-white shadow-soft lg:grid-cols-[0.9fr_1fr]">
-          <div className="relative min-h-[420px] bg-slate-100">
-            <img className="absolute inset-0 h-full w-full object-cover" src={imageUrl(current.profilePhoto)} alt={current.name} />
-            <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-2 text-sm font-black text-campus-teal shadow-sm">
+        <article className="swipe-card mx-auto grid max-w-5xl overflow-hidden rounded-lg border border-campus-line bg-white shadow-soft lg:grid-cols-[0.9fr_1fr]">
+          <div className="relative min-h-[430px] bg-slate-100 sm:min-h-[520px] lg:min-h-[520px]">
+            <img className="absolute inset-0 h-full w-full object-cover" src={imageUrl(currentPhotos[photoIndex] || current.profilePhoto)} alt={current.name} />
+            <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-2 text-sm font-black text-campus-teal shadow-sm">
               Verified
             </div>
+            {currentPhotos.length > 1 && (
+              <div className="absolute inset-x-3 bottom-3 flex gap-2 overflow-x-auto rounded-lg bg-white/82 p-2 backdrop-blur">
+                {currentPhotos.map((photo, photoPosition) => (
+                  <button
+                    className={`h-14 w-14 shrink-0 overflow-hidden rounded-lg border-2 ${photoPosition === photoIndex ? "border-campus-teal" : "border-white"}`}
+                    key={`${photo}-${photoPosition}`}
+                    type="button"
+                    onClick={() => setPhotoIndex(photoPosition)}
+                    aria-label={`Show photo ${photoPosition + 1}`}
+                  >
+                    <img className="h-full w-full object-cover" src={imageUrl(photo)} alt="" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="flex flex-col justify-between gap-6 p-6">
+          <div className="flex flex-col justify-between gap-5 p-4 sm:p-6">
             <div>
               <p className="text-xs font-black uppercase text-campus-gold">Profile {Math.min(index + 1, users.length)} of {users.length}</p>
-              <h2 className="mt-2 text-4xl font-black">{current.name}, {current.age}</h2>
+              <h2 className="mt-2 text-3xl font-black sm:text-4xl">{current.name}, {current.age}</h2>
               <p className="mt-2 font-bold text-campus-muted">{current.department} | {current.semester}</p>
               <p className="mt-5 leading-8 text-campus-muted">{current.bio || "No bio added yet."}</p>
               <div className="mt-5 flex flex-wrap gap-2">

@@ -78,7 +78,7 @@
   }
 
   .nav-link {
-    @apply rounded-lg border border-campus-line bg-white px-4 py-3 font-black text-campus-ink transition hover:-translate-y-0.5 hover:border-campus-teal hover:text-campus-teal;
+    @apply flex items-center gap-3 rounded-lg border border-campus-line bg-white px-4 py-3 font-black text-campus-ink transition hover:-translate-y-0.5 hover:border-campus-teal hover:text-campus-teal;
   }
 
   .nav-link.active {
@@ -127,6 +127,22 @@
 
   .round-btn.like {
     @apply text-campus-rose;
+  }
+
+  .mobile-tab {
+    @apply grid min-w-0 place-items-center gap-0.5 rounded-lg px-1.5 py-1.5 text-[11px] font-black text-campus-muted transition;
+  }
+
+  .mobile-tab svg {
+    @apply text-campus-muted;
+  }
+
+  .mobile-tab.active {
+    @apply bg-[#e1f6ef] text-[#075e5a];
+  }
+
+  .mobile-tab.active svg {
+    @apply text-campus-teal;
   }
 
   .message-box {
@@ -370,7 +386,7 @@
   }
 
   .ai-chat {
-    @apply fixed bottom-5 right-5 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-3;
+    @apply fixed bottom-24 right-5 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-3 lg:bottom-5;
   }
 
   .ai-chat-toggle {
@@ -567,6 +583,10 @@
 
   .emoji-picker {
     @apply fixed bottom-24 left-3 right-3 w-auto grid-cols-5;
+  }
+
+  .swipe-card {
+    min-height: calc(100svh - 9.5rem);
   }
 }
 
