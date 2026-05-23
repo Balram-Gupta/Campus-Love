@@ -8,7 +8,7 @@ export default function LandingPage() {
           <p className="text-xs font-black uppercase text-campus-gold">Verified university dating</p>
           <h1 className="mt-3 text-5xl font-black leading-tight md:text-7xl">CampusLove</h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-campus-muted">
-            A campus-only dating MVP with email OTP, student ID verification, admin approval, swipe matching,
+            A campus-only dating MVP with profile signup, student ID verification, admin approval, swipe matching,
             real-time chat, reporting, blocking, and notifications.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">

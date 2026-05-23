@@ -12,11 +12,11 @@ const suggestions = [
 
 const siteKnowledge = [
   {
-    title: "Signup and OTP",
+    title: "Signup",
     path: "/signup",
-    keywords: ["signup", "sign up", "register", "create account", "otp", "verify email", "email verification", "student id", "id card"],
+    keywords: ["signup", "sign up", "register", "create account", "student id", "id card"],
     answer:
-      "To create a CampusLove account, open Signup, enter your email, request the 6-digit OTP, verify it, then complete your profile. Signup needs your name, password, age above 18, gender, department, course, semester, roll number, bio, interests, student ID card image, and profile photo. After submission, an admin must approve your ID before you can log in and use swipe, matches, chat, voice call, or video call."
+      "To create a CampusLove account, open Signup and complete your profile. Signup needs your name, email, password, age above 18, gender, department, course, semester, roll number, bio, interests, student ID card image, and profile photo. After submission, an admin must approve your ID before you can log in and use swipe, matches, chat, voice call, or video call."
   },
   {
     title: "Login",
@@ -93,12 +93,12 @@ const siteKnowledge = [
     path: "/",
     keywords: ["feature", "features", "about", "what is", "how works", "campuslove", "site", "website", "web app"],
     answer:
-      "CampusLove is a campus-only dating web app. Its main features are email OTP signup, student ID verification, admin approval, swipe discovery, mutual matches, real-time chat, voice and video calls, profile editing, gallery photos, notifications, reporting, blocking, privacy settings, and an admin dashboard."
+      "CampusLove is a campus-only dating web app. Its main features are profile signup, student ID verification, admin approval, swipe discovery, mutual matches, real-time chat, voice and video calls, profile editing, gallery photos, notifications, reporting, blocking, privacy settings, and an admin dashboard."
   }
 ];
 
 const quickReplies = {
-  hello: "Hi. I am CampusLove AI, the site assistant. Ask me about signup, OTP, approval, swipe, matches, chat, calls, profile, safety, notifications, or admin features.",
+  hello: "Hi. I am CampusLove AI, the site assistant. Ask me about signup, approval, swipe, matches, chat, calls, profile, safety, notifications, or admin features.",
   thanks: "You are welcome. I can also point you to the correct page if you are stuck in the web app."
 };
 
@@ -146,7 +146,7 @@ function answerQuestion(rawQuestion, pathname, user) {
   if (!best || best.score === 0) {
     return {
       text:
-        "I can help with CampusLove web-app questions only: signup, OTP, approval, login, swipe, matches, chat, calls, profile, notifications, safety, reports, blocking, and admin review. Try asking about one of those features.",
+        "I can help with CampusLove web-app questions only: signup, approval, login, swipe, matches, chat, calls, profile, notifications, safety, reports, blocking, and admin review. Try asking about one of those features.",
       path: null
     };
   }

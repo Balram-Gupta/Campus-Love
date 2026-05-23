@@ -10,7 +10,7 @@ CampusLove is a university-only dating MVP built from the provided tech-stack do
 - Auth: JWT
 - Uploads: Multer, Cloudinary-ready image storage
 - Chat and notifications: Socket.io
-- Email OTP: Nodemailer
+- Email: Mailjet SMTP with Nodemailer
 
 ## Included features
 
@@ -18,7 +18,6 @@ CampusLove is a university-only dating MVP built from the provided tech-stack do
 - Signup page
 - Login page
 - Upload ID page
-- Email OTP verification
 - Pending verification page
 - Admin approval/rejection system
 - Profile setup page
@@ -41,8 +40,7 @@ CampusLove is a university-only dating MVP built from the provided tech-stack do
 
 - Users must be older than 18.
 - Users cannot swipe, match, chat, call, report, or block until admin approval.
-- New users start with `verificationStatus = "email-pending"` and `isVerified = false`.
-- After OTP verification, users move to `verificationStatus = "pending"`.
+- New users submit their profile and ID card with `verificationStatus = "pending"` and `isVerified = false`.
 - Admin approval sets `verificationStatus = "approved"` and `isVerified = true`.
 - No one can become admin from the site. Create admins only from the database seed script.
 
@@ -60,7 +58,7 @@ npm install
 cp backend/.env.example backend/.env
 ```
 
-3. Update `.env` with MongoDB, JWT, email, and Cloudinary values.
+3. Update `.env` with MongoDB, JWT, Mailjet email, and Cloudinary values.
 
 4. Create an admin:
 
@@ -92,7 +90,6 @@ Backend: `http://localhost:8000`
 ## API map
 
 - `POST /api/auth/register`
-- `POST /api/auth/verify-otp`
 - `POST /api/auth/login`
 - `GET /api/users/me`
 - `PUT /api/users/profile`
@@ -126,10 +123,11 @@ Backend: `http://localhost:8000`
 ## Notes for production
 
 - On Render static frontend hosting, use the `render.yaml` rewrite route, or add the same rule in the Render Dashboard: source `/*`, destination `/index.html`, action `Rewrite`. This makes direct SPA routes such as `/login`, `/signup`, and `/chat/:matchId` serve `index.html`.
-- Backend email OTP depends on `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS`. `SMTP_TIMEOUT_MS` defaults to `8000`, which keeps `/api/auth/request-registration-otp` from hanging indefinitely when SMTP is unreachable.
+- Backend email notifications use Mailjet SMTP through Nodemailer. Set `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, and `MAIL_FROM` in the deployed backend environment. `MAIL_FROM` must be a verified sender in Mailjet, for example `CampusLove <no-reply@yourdomain.com>`.
+- Mailjet defaults to `in-v3.mailjet.com` on port `587`. You can override with `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` if needed.
 - Use HTTPS and secure cookies.
 - Store uploaded ID cards in private Cloudinary folders or private object storage.
-- Add rate limits to OTP, login, swipe, message, report, and upload endpoints.
+- Add rate limits to login, password reset, swipe, message, report, and upload endpoints.
 - Add CSRF protection if cookie auth is used.
 - Add moderation tools for profile photos, bio text, and chat messages.
 - Complete WebRTC peer connection UI using the included Socket.io signaling events.

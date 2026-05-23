@@ -7,7 +7,6 @@ import LandingPage from "./pages/LandingPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
-import OtpPage from "./pages/OtpPage.jsx";
 import UploadIdPage from "./pages/UploadIdPage.jsx";
 import PendingPage from "./pages/PendingPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
@@ -41,7 +40,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomeRoute />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/verify-otp" element={<OtpPage />} />
         <Route path="/upload-id" element={<UploadIdPage />} />
         <Route path="/pending" element={<PendingPage />} />
         <Route path="/login" element={<LoginPage />} />

@@ -16,6 +16,8 @@ export default function ChatPage() {
   const [incomingCall, setIncomingCall] = useState(null);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
+  const [localVideoReady, setLocalVideoReady] = useState(false);
+  const [remoteVideoReady, setRemoteVideoReady] = useState(false);
   const [mediaSupport, setMediaSupport] = useState({ checked: false, audio: false, video: false, calls: false });
   const [blockedUserIds, setBlockedUserIds] = useState([]);
   const socketRef = useRef(null);
@@ -87,13 +89,14 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
-    socketRef.current = io(SOCKET_URL, { auth: { token } });
-    socketRef.current.on("message:new", (message) => {
+    const socket = io(SOCKET_URL, { auth: { token } });
+    socketRef.current = socket;
+    socket.on("message:new", (message) => {
       if (message.matchId === matchId) {
         setMessages((current) => [...current, message]);
       }
     });
-    socketRef.current.on("call:offer", ({ from, matchId: incomingMatchId, offer }) => {
+    socket.on("call:offer", ({ from, matchId: incomingMatchId, offer }) => {
       if (from === currentUserId) return;
       if (incomingMatchId && incomingMatchId !== matchId) {
         navigate(`/chat/${incomingMatchId}`);
@@ -102,7 +105,7 @@ export default function ChatPage() {
       setIncomingCall({ from, matchId: incomingMatchId, offer });
       setStatus(`${offer.kind || "Video"} call incoming.`);
     });
-    socketRef.current.on("call:answer", async ({ matchId: signalMatchId, answer }) => {
+    socket.on("call:answer", async ({ matchId: signalMatchId, answer }) => {
       if (signalMatchId && signalMatchId !== matchId) return;
       if (!peerRef.current) return;
       await peerRef.current.setRemoteDescription(new RTCSessionDescription(answer));
@@ -110,7 +113,7 @@ export default function ChatPage() {
       setCall((current) => current ? { ...current, state: "connected" } : current);
       setStatus("Call connected.");
     });
-    socketRef.current.on("call:ice-candidate", async ({ matchId: signalMatchId, candidate }) => {
+    socket.on("call:ice-candidate", async ({ matchId: signalMatchId, candidate }) => {
       if (!candidate) return;
       if (signalMatchId && signalMatchId !== matchId) return;
       if (!peerRef.current || !peerRef.current.remoteDescription) {
@@ -123,12 +126,17 @@ export default function ChatPage() {
         setStatus("Could not add call connection candidate.");
       }
     });
-    socketRef.current.on("call:end", ({ matchId: signalMatchId }) => {
+    socket.on("call:end", ({ matchId: signalMatchId }) => {
       if (!signalMatchId || signalMatchId === matchId) {
         endCall("Call ended.", false);
       }
     });
-    return () => socketRef.current.disconnect();
+    return () => {
+      socket.disconnect();
+      if (socketRef.current === socket) {
+        socketRef.current = null;
+      }
+    };
   }, [token, matchId, currentUserId, navigate]);
 
   useEffect(() => {
@@ -230,15 +238,21 @@ export default function ChatPage() {
 
     stream.getTracks().forEach((track) => peer.addTrack(track, stream));
     peer.ontrack = (event) => {
-      const currentRemoteStream = remoteStreamRef.current || new MediaStream();
-      const hasTrack = currentRemoteStream.getTracks().some((track) => track.id === event.track.id);
-      if (!hasTrack) {
-        currentRemoteStream.addTrack(event.track);
-      }
-      remoteStreamRef.current = currentRemoteStream;
-      setRemoteStream(currentRemoteStream);
-      attachMediaStream(remoteVideoRef.current, currentRemoteStream);
-      attachMediaStream(remoteAudioRef.current, currentRemoteStream);
+      const existingTracks = remoteStreamRef.current?.getTracks() || [];
+      const nextTracks = existingTracks.some((track) => track.id === event.track.id)
+        ? existingTracks
+        : [...existingTracks, event.track];
+      const nextRemoteStream = new MediaStream(nextTracks);
+
+      remoteStreamRef.current = nextRemoteStream;
+      setRemoteStream(nextRemoteStream);
+      attachMediaStream(remoteVideoRef.current, nextRemoteStream);
+      attachMediaStream(remoteAudioRef.current, nextRemoteStream);
+
+      event.track.onunmute = () => {
+        attachMediaStream(remoteVideoRef.current, nextRemoteStream);
+        attachMediaStream(remoteAudioRef.current, nextRemoteStream);
+      };
     };
     peer.onicecandidate = (event) => {
       if (event.candidate) {
@@ -266,10 +280,11 @@ export default function ChatPage() {
       activeCallMatchIdRef.current = matchId;
       localStreamRef.current = stream;
       setLocalStream(stream);
+      setLocalVideoReady(false);
       attachMediaStream(localVideoRef.current, stream);
-      const emptyRemoteStream = new MediaStream();
-      remoteStreamRef.current = emptyRemoteStream;
-      setRemoteStream(emptyRemoteStream);
+      remoteStreamRef.current = null;
+      setRemoteStream(null);
+      setRemoteVideoReady(false);
       setCall({ kind, state: "calling" });
       const peer = createPeer(stream);
       const offer = await peer.createOffer();
@@ -290,10 +305,11 @@ export default function ChatPage() {
       activeCallMatchIdRef.current = callMatchId;
       localStreamRef.current = stream;
       setLocalStream(stream);
+      setLocalVideoReady(false);
       attachMediaStream(localVideoRef.current, stream);
-      const emptyRemoteStream = new MediaStream();
-      remoteStreamRef.current = emptyRemoteStream;
-      setRemoteStream(emptyRemoteStream);
+      remoteStreamRef.current = null;
+      setRemoteStream(null);
+      setRemoteVideoReady(false);
       setCall({ kind, state: "connected" });
       const peer = createPeer(stream);
       await peer.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
@@ -322,6 +338,8 @@ export default function ChatPage() {
     attachMediaStream(remoteAudioRef.current, null);
     setLocalStream(null);
     setRemoteStream(null);
+    setLocalVideoReady(false);
+    setRemoteVideoReady(false);
     setCall(null);
     setIncomingCall(null);
     if (notify && matchId) {
@@ -342,6 +360,10 @@ export default function ChatPage() {
   const callsUnavailableMessage = getCallUnavailableMessage("Voice");
   const hasRemoteVideo = Boolean(remoteStream?.getVideoTracks().some((track) => track.readyState === "live"));
   const hasLocalVideo = Boolean(localStream?.getVideoTracks().some((track) => track.readyState === "live"));
+  const showRemoteVideo = hasRemoteVideo && remoteVideoReady;
+  const showLocalVideo = hasLocalVideo && localVideoReady;
+  const currentUserName = user?.name || "You";
+  const currentUserInitial = currentUserName.trim().charAt(0).toUpperCase() || "Y";
 
   async function toggleBlockUser() {
     if (!otherUser) return;
@@ -443,17 +465,45 @@ export default function ChatPage() {
                   </div>
                 ) : (
                   <div className={`call-stage ${call.kind === "Voice" ? "voice-only" : ""}`}>
-                    <video className={`remote-video ${hasRemoteVideo ? "" : "empty"}`} ref={remoteVideoRef} autoPlay muted playsInline />
+                    <video
+                      className={`remote-video ${showRemoteVideo ? "" : "empty"}`}
+                      ref={remoteVideoRef}
+                      autoPlay
+                      muted
+                      playsInline
+                      onLoadedData={() => setRemoteVideoReady(true)}
+                      onPlaying={() => setRemoteVideoReady(true)}
+                      onWaiting={() => setRemoteVideoReady(false)}
+                      onEmptied={() => setRemoteVideoReady(false)}
+                    />
                     <audio ref={remoteAudioRef} autoPlay />
-                    {!hasRemoteVideo && (
+                    {!showRemoteVideo && (
                       <div className="call-placeholder">
                         <h4>{call.state === "calling" ? `Calling ${otherUser?.name || "your match"}...` : "Waiting for video"}</h4>
                         <p>{call.state === "calling" ? "The video will appear after they answer." : "Audio may be connected while the camera is still unavailable."}</p>
                       </div>
                     )}
-                    <div className={`local-preview ${hasLocalVideo ? "" : "empty"}`}>
-                      <video ref={localVideoRef} autoPlay muted playsInline />
-                      {!hasLocalVideo && <span>No camera preview</span>}
+                    <div className={`local-preview ${showLocalVideo ? "ready" : "empty"}`}>
+                      <video
+                        ref={localVideoRef}
+                        autoPlay
+                        muted
+                        playsInline
+                        onLoadedData={() => setLocalVideoReady(true)}
+                        onPlaying={() => setLocalVideoReady(true)}
+                        onWaiting={() => setLocalVideoReady(false)}
+                        onEmptied={() => setLocalVideoReady(false)}
+                      />
+                      {!showLocalVideo && (
+                        <div className="local-preview-fallback">
+                          {user?.profilePhoto ? (
+                            <img src={imageUrl(user.profilePhoto)} alt={currentUserName} />
+                          ) : (
+                            <span className="local-preview-initial">{currentUserInitial}</span>
+                          )}
+                          <span>{hasLocalVideo ? "Starting camera" : "Camera unavailable"}</span>
+                        </div>
+                      )}
                     </div>
                     {call.kind === "Voice" && <div className="voice-call-label">Voice call in progress</div>}
                   </div>

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Campus-only dating MVP with React, Express, MongoDB, JWT, OTP, uploads, admin approval, swipe, matches, chat, reports, and notifications.",
+  "description": "Campus-only dating MVP with React, Express, MongoDB, JWT, uploads, admin approval, swipe, matches, chat, reports, and notifications.",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "client": "vite --config frontend/vite.config.js --host 127.0.0.1 --port 5173",

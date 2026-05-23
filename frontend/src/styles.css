@@ -227,15 +227,35 @@
   }
 
   .local-preview {
-    @apply absolute bottom-4 right-4 grid h-32 w-44 place-items-center overflow-hidden rounded-lg border-2 border-white bg-slate-800 text-center text-xs font-black text-white/80 shadow-soft;
+    @apply absolute bottom-4 right-4 grid h-32 w-44 place-items-center overflow-hidden rounded-lg border-2 border-white bg-slate-900 text-center text-xs font-black text-white shadow-soft;
   }
 
   .local-preview video {
-    @apply h-full w-full object-cover;
+    @apply h-full w-full object-cover opacity-0;
+  }
+
+  .local-preview.ready video {
+    @apply opacity-100;
   }
 
   .local-preview.empty video {
-    @apply hidden;
+    @apply opacity-0;
+  }
+
+  .local-preview-fallback {
+    @apply absolute inset-0 grid h-full w-full place-items-center gap-2 bg-gradient-to-br from-[#102825] to-[#233447] px-3 py-4;
+  }
+
+  .local-preview-fallback img {
+    @apply h-14 w-14 rounded-full border-2 border-white/80 object-cover;
+  }
+
+  .local-preview-fallback span:last-child {
+    @apply leading-4 text-white/85;
+  }
+
+  .local-preview-initial {
+    @apply grid h-14 w-14 place-items-center rounded-full border-2 border-white/80 bg-campus-teal text-xl text-white;
   }
 
   .voice-only .remote-video,
