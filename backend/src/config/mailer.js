@@ -1,6 +1,6 @@
   import nodemailer from "nodemailer";
 
-  const mailTimeoutMs = Number(process.env.SMTP_TIMEOUT_MS || 60000);
+  const mailTimeoutMs = Number(60000);
   const isProduction = process.env.NODE_ENV === "production";
 
   function envValue(name) {
