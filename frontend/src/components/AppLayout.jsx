@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, NavLink, Outlet } from "react-router-dom";
+import IncomingCallOverlay from "./IncomingCallOverlay.jsx";
 import NotificationBell from "./NotificationBell.jsx";
 import { useAuth } from "../state/AuthContext.jsx";
+import { SocketProvider } from "../state/SocketContext.jsx";
 import { api, imageUrl } from "../utils/api.js";
 
 const links = [
@@ -63,7 +65,8 @@ export default function AppLayout() {
   }
 
   return (
-    <main className="min-h-screen bg-campus-paper text-campus-ink lg:grid lg:grid-cols-[284px_1fr]">
+    <SocketProvider>
+      <main className="min-h-screen bg-campus-paper text-campus-ink lg:grid lg:grid-cols-[284px_1fr]">
       <aside className="border-b border-campus-line bg-white/95 p-4 shadow-sm lg:sticky lg:top-0 lg:min-h-screen lg:border-b-0 lg:border-r lg:p-5">
         <NavLink to="/swipe" className="mb-6 flex items-center gap-3 rounded-lg border border-campus-line bg-campus-paper p-3 transition hover:border-campus-teal">
           <img className="h-12 w-12 rounded-lg object-cover ring-2 ring-white" src={imageUrl(user?.profilePhoto)} alt={user?.name || "Profile"} />
@@ -112,6 +115,8 @@ export default function AppLayout() {
         </header>
         <Outlet />
       </section>
+      <IncomingCallOverlay />
     </main>
+    </SocketProvider>
   );
 }
