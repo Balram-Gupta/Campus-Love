@@ -3,6 +3,10 @@ import nodemailer from "nodemailer";
 const mailTimeoutMs = Number(process.env.SMTP_TIMEOUT_MS || 8000);
 const isProduction = process.env.NODE_ENV === "production";
 
+function envValue(name) {
+  return process.env[name]?.trim();
+}
+
 async function withTimeout(promise, ms) {
   let timeoutId;
   const timeoutPromise = new Promise((_, reject) => {
@@ -21,20 +25,25 @@ async function withTimeout(promise, ms) {
 }
 
 export function createTransporter() {
-  if (!process.env.SMTP_HOST) {
+  const smtpHost = envValue("SMTP_HOST");
+  const smtpPort = Number(envValue("SMTP_PORT") || 587);
+  const smtpUser = envValue("SMTP_USER");
+  const smtpPass = envValue("SMTP_PASS");
+
+  if (!smtpHost) {
     return null;
   }
 
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: Number(process.env.SMTP_PORT) === 465,
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
     connectionTimeout: mailTimeoutMs,
     greetingTimeout: mailTimeoutMs,
     socketTimeout: mailTimeoutMs,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
+      user: smtpUser,
+      pass: smtpPass
     }
   });
 }
@@ -52,7 +61,7 @@ export async function sendMail({ to, subject, text }) {
 
   await withTimeout(
     transporter.sendMail({
-      from: process.env.MAIL_FROM || process.env.SMTP_USER,
+      from: envValue("MAIL_FROM") || envValue("SMTP_USER"),
       to,
       subject,
       text

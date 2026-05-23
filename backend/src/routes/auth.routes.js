@@ -17,6 +17,13 @@ async function sendOtpEmail({ email, subject, text, otp }) {
     await sendMail({ to: email, subject, text });
     return { message: "OTP sent. Check your email." };
   } catch (error) {
+    console.error("OTP email send failed:", {
+      code: error.code,
+      command: error.command,
+      responseCode: error.responseCode,
+      message: error.message
+    });
+
     if (!canUseDevOtpFallback) {
       error.status = 502;
       error.expose = true;
