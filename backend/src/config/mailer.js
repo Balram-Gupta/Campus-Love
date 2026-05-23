@@ -30,9 +30,9 @@
     const smtpUser = envValue("SMTP_USER");
     const smtpPass = envValue("SMTP_PASS");
 
-    if (!smtpHost) {
-      return null;
-    }
+    if (!smtpHost || !smtpUser || !smtpPass) {
+  return null;
+}
 
     return nodemailer.createTransport({
       host: smtpHost,
@@ -49,23 +49,28 @@
   }
 
   export async function sendMail({ to, subject, text }) {
-    const transporter = createTransporter();
-    if (!transporter) {
-      if (isProduction) {
-        throw new Error("SMTP_HOST is not configured");
-      }
+  const transporter = createTransporter();
 
-      console.log(`[email skipped] ${subject} -> ${to}: ${text}`);
-      return;
-    }
+  console.log("HOST:", process.env.SMTP_HOST);
+  console.log("PORT:", process.env.SMTP_PORT);
+  console.log("USER:", process.env.SMTP_USER);
+  console.log("PASS EXISTS:", !!process.env.SMTP_PASS);
 
-    await withTimeout(
-      transporter.sendMail({
-        from: envValue("MAIL_FROM") || envValue("SMTP_USER"),
-        to,
-        subject,
-        text
-      }),
-      mailTimeoutMs
-    );
+  try {
+    await transporter.verify();
+    console.log("SMTP server connected");
+
+    const info = await transporter.sendMail({
+      from: process.env.MAIL_FROM,
+      to,
+      subject,
+      text,
+    });
+
+    console.log("MAIL SENT:", info.messageId);
+
+  } catch (err) {
+    console.error("SMTP ERROR FULL:", err);
+    throw err;
   }
+}
