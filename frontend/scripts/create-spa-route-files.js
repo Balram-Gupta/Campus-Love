@@ -1,7 +1,10 @@
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const distDir = join(process.cwd(), "frontend", "dist");
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const frontendDir = join(scriptDir, "..");
+const distDir = join(frontendDir, "dist");
 const indexFile = join(distDir, "index.html");
 
 const routes = [

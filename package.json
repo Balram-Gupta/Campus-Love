@@ -9,7 +9,7 @@
     "client": "vite --config frontend/vite.config.js --host 127.0.0.1 --port 5173",
     "server": "nodemon backend/server.js",
     "start": "node backend/server.js",
-    "build": "vite build --config frontend/vite.config.js && node scripts/create-spa-route-files.js",
+    "build": "vite build --config frontend/vite.config.js && node frontend/scripts/create-spa-route-files.js",
     "seed:admin": "node backend/scripts/createAdmin.js",
     "seed:matched-users": "node backend/scripts/seedMatchedUsers.js"
   },
