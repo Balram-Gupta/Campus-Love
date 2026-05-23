@@ -48,29 +48,22 @@
     });
   }
 
-  export async function sendMail({ to, subject, text }) {
+ export async function sendMail({ to, subject, text }) {
   const transporter = createTransporter();
 
-  console.log("HOST:", process.env.SMTP_HOST);
-  console.log("PORT:", process.env.SMTP_PORT);
-  console.log("USER:", process.env.SMTP_USER);
-  console.log("PASS EXISTS:", !!process.env.SMTP_PASS);
+  if (!transporter) {
+    throw new Error("SMTP is not configured");
+  }
 
-  try {
-    await transporter.verify();
-    console.log("SMTP server connected");
-
-    const info = await transporter.sendMail({
-      from: process.env.MAIL_FROM,
+  const info = await withTimeout(
+    transporter.sendMail({
+      from: `"CampusLove" <${envValue("MAIL_FROM") || envValue("SMTP_USER")}>`,
       to,
       subject,
-      text,
-    });
+      text
+    }),
+    mailTimeoutMs
+  );
 
-    console.log("MAIL SENT:", info.messageId);
-
-  } catch (err) {
-    console.error("SMTP ERROR FULL:", err);
-    throw err;
-  }
+  console.log("MAIL SENT:", info.messageId);
 }
