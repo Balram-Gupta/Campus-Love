@@ -68,7 +68,18 @@ cp backend/.env.example backend/.env
 npm run seed:admin -- admin@university.edu StrongPassword123
 ```
 
-5. Start the project:
+5. Optional: create two approved matched QA users for chat, voice, and video-call testing:
+
+```bash
+npm run seed:matched-users
+```
+
+This creates:
+
+- `video.test.one@campuslove.test` / `TestPassword123`
+- `video.test.two@campuslove.test` / `TestPassword123`
+
+6. Start the project:
 
 ```bash
 npm run dev
@@ -114,6 +125,8 @@ Backend: `http://localhost:8000`
 
 ## Notes for production
 
+- On Render static frontend hosting, use the `render.yaml` rewrite route, or add the same rule in the Render Dashboard: source `/*`, destination `/index.html`, action `Rewrite`. This makes direct SPA routes such as `/login`, `/signup`, and `/chat/:matchId` serve `index.html`.
+- Backend email OTP depends on `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS`. `SMTP_TIMEOUT_MS` defaults to `8000`, which keeps `/api/auth/request-registration-otp` from hanging indefinitely when SMTP is unreachable.
 - Use HTTPS and secure cookies.
 - Store uploaded ID cards in private Cloudinary folders or private object storage.
 - Add rate limits to OTP, login, swipe, message, report, and upload endpoints.

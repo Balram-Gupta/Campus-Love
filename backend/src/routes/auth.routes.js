@@ -20,7 +20,7 @@ async function sendOtpEmail({ email, subject, text, otp }) {
     if (!canUseDevOtpFallback) {
       error.status = 502;
       error.expose = true;
-      error.message = "Could not send OTP email. Check SMTP_USER and SMTP_PASS in backend/.env.";
+      error.message = "Could not send OTP email. Check SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS in the deployed backend environment.";
       throw error;
     }
 
