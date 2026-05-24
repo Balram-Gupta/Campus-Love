@@ -155,23 +155,31 @@ router.post(
       return res.status(400).json({ message: "Student ID card and profile photo are required" });
     }
 
-    const user = await User.create({
-      name,
-      email,
-      password,
-      age,
-      gender,
-      department,
-      course,
-      semester,
-      rollNumber,
-      bio,
-      interests: String(interests).split(",").map((item) => item.trim()).filter(Boolean),
-      genderPreference,
-      profilePhoto,
-      studentIdCard,
-      verificationStatus: "pending"
-    });
+    let user;
+    try {
+      user = await User.create({
+        name,
+        email,
+        password,
+        age,
+        gender,
+        department,
+        course,
+        semester,
+        rollNumber,
+        bio,
+        interests: String(interests).split(",").map((item) => item.trim()).filter(Boolean),
+        genderPreference,
+        profilePhoto,
+        studentIdCard,
+        verificationStatus: "pending"
+      });
+    } catch (error) {
+      if (error.code === 11000) {
+        return res.status(409).json({ message: "Email or roll number already registered" });
+      }
+      throw error;
+    }
 
     await notifyAdmins(req.app.get("io"), "New signup request", `${user.name} submitted ID verification.`, {
       type: "verification_request",
