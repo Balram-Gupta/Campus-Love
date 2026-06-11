@@ -82,7 +82,6 @@ registerSocketHandlers(io);
 const port = process.env.PORT || 8000;
 connectDb().then(() => {
   server.listen(port, () => {
-    console.log(`CampusLove API running on port ${port}`);
+    console.log(`MDU CampusLove API running on port ${port}`);
   });
 });
-

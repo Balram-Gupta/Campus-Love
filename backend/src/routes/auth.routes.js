@@ -63,8 +63,8 @@ router.post("/request-password-reset-otp", asyncHandler(async (req, res) => {
 
   const otpResult = await sendOtpEmail({
     email,
-    subject: "CampusLove password reset OTP",
-    text: `Your CampusLove password reset OTP is ${otp}. It expires in 10 minutes.`,
+    subject: "MDU CampusLove password reset OTP",
+    text: `Your MDU CampusLove password reset OTP is ${otp}. It expires in 10 minutes.`,
     otp
   });
 

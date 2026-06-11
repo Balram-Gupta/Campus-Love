@@ -77,10 +77,10 @@ router.put("/approve/:id", asyncHandler(async (req, res) => {
   user.verificationStatus = "approved";
   await user.save();
   await clearVerificationRequestNotification(req.app.get("io"), user._id);
-  await notifyUser(req.app.get("io"), user._id, "Profile approved", "Your CampusLove profile is verified.");
+  await notifyUser(req.app.get("io"), user._id, "Profile approved", "Your MDU CampusLove profile is verified.");
   const emailSent = await sendStatusEmail({
     to: user.email,
-    subject: "CampusLove profile approved",
+    subject: "MDU CampusLove profile approved",
     text: "Your profile is verified. You can now log in, swipe, match, chat, and call."
   });
   res.json({
@@ -101,7 +101,7 @@ router.put("/reject/:id", asyncHandler(async (req, res) => {
   await notifyUser(req.app.get("io"), user._id, "Profile rejected", "Your student ID verification was rejected.");
   const emailSent = await sendStatusEmail({
     to: user.email,
-    subject: "CampusLove profile rejected",
+    subject: "MDU CampusLove profile rejected",
     text: "Your profile could not be verified. Please contact campus admin for help."
   });
   res.json({
