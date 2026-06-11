@@ -130,7 +130,13 @@
   }
 
   .mobile-tab {
-    @apply grid min-w-0 place-items-center gap-0.5 rounded-lg px-1.5 py-1.5 text-[11px] font-black text-campus-muted transition;
+    @apply grid min-w-0 place-items-center gap-0.5 rounded-lg px-1 py-1.5 text-[10px] font-black text-campus-muted transition sm:px-1.5 sm:text-[11px];
+    min-height: 3.35rem;
+    grid-template-rows: 1.5rem auto;
+  }
+
+  .mobile-tab span {
+    @apply max-w-full truncate;
   }
 
   .mobile-tab svg {
@@ -602,11 +608,9 @@
 @keyframes route-fade-slide {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 

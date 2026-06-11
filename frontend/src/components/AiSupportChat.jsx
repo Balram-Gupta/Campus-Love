@@ -16,7 +16,7 @@ const siteKnowledge = [
     path: "/signup",
     keywords: ["signup", "sign up", "register", "create account", "student id", "id card"],
     answer:
-      "To create a CampusLove account, open Signup and complete your profile. Signup needs your name, email, password, age above 18, gender, department, course, semester, roll number, bio, interests, student ID card image, and profile photo. After submission, an admin must approve your ID before you can log in and use swipe, matches, chat, voice call, or video call."
+      "To create an MDU CampusLove account, open Signup and complete your profile. Signup needs your name, email, password, age above 18, gender, department, course, semester, roll number, bio, interests, student ID card image, and profile photo. After submission, an admin must approve your ID before you can log in and use swipe, matches, chat, voice call, or video call."
   },
   {
     title: "Login",
@@ -44,7 +44,7 @@ const siteKnowledge = [
     path: "/swipe",
     keywords: ["swipe", "discover", "like", "skip", "profiles", "students", "no more profiles"],
     answer:
-      "The Swipe page shows approved student profiles. Use Like to show interest or Skip to move on. If both students like each other, CampusLove creates a match and chat becomes available. If there are no cards, there are no more verified profiles available right now."
+      "The Swipe page shows approved student profiles. Use Like to show interest or Skip to move on. If both students like each other, MDU CampusLove creates a match and chat becomes available. If there are no cards, there are no more verified profiles available right now."
   },
   {
     title: "Matches",
@@ -72,7 +72,7 @@ const siteKnowledge = [
     path: "/settings",
     keywords: ["block", "unblock", "report", "safety", "privacy", "abuse", "harassment", "settings"],
     answer:
-      "CampusLove has blocking and reporting. In Chat, use Block to stop contact or Report to send a safety report to admins. Settings shows people you blocked and lets you unblock them. The privacy guidance is to never share your phone number, exact location, dorm room, timetable, or student ID image with other users."
+      "MDU CampusLove has blocking and reporting. In Chat, use Block to stop contact or Report to send a safety report to admins. Settings shows people you blocked and lets you unblock them. The privacy guidance is to never share your phone number, exact location, dorm room, timetable, or student ID image with other users."
   },
   {
     title: "Notifications",
@@ -93,12 +93,12 @@ const siteKnowledge = [
     path: "/",
     keywords: ["feature", "features", "about", "what is", "how works", "campuslove", "site", "website", "web app"],
     answer:
-      "CampusLove is a campus-only dating web app. Its main features are profile signup, student ID verification, admin approval, swipe discovery, mutual matches, real-time chat, voice and video calls, profile editing, gallery photos, notifications, reporting, blocking, privacy settings, and an admin dashboard."
+      "MDU CampusLove is a campus-only dating web app. Its main features are profile signup, student ID verification, admin approval, swipe discovery, mutual matches, real-time chat, voice and video calls, profile editing, gallery photos, notifications, reporting, blocking, privacy settings, and an admin dashboard."
   }
 ];
 
 const quickReplies = {
-  hello: "Hi. I am CampusLove AI, the site assistant. Ask me about signup, approval, swipe, matches, chat, calls, profile, safety, notifications, or admin features.",
+  hello: "Hi. I am MDU CampusLove AI, the site assistant. Ask me about signup, approval, swipe, matches, chat, calls, profile, safety, notifications, or admin features.",
   thanks: "You are welcome. I can also point you to the correct page if you are stuck in the web app."
 };
 
@@ -125,7 +125,7 @@ function answerQuestion(rawQuestion, pathname, user) {
   const question = normalize(rawQuestion);
   if (!question) {
     return {
-      text: "Ask me a question about how the CampusLove web app works.",
+      text: "Ask me a question about how the MDU CampusLove web app works.",
       path: null
     };
   }
@@ -146,13 +146,13 @@ function answerQuestion(rawQuestion, pathname, user) {
   if (!best || best.score === 0) {
     return {
       text:
-        "I can help with CampusLove web-app questions only: signup, approval, login, swipe, matches, chat, calls, profile, notifications, safety, reports, blocking, and admin review. Try asking about one of those features.",
+        "I can help with MDU CampusLove web-app questions only: signup, approval, login, swipe, matches, chat, calls, profile, notifications, safety, reports, blocking, and admin review. Try asking about one of those features.",
       path: null
     };
   }
 
   const userHint = user
-    ? `You are signed in as ${user.name || "a CampusLove user"}. `
+    ? `You are signed in as ${user.name || "an MDU CampusLove user"}. `
     : "You are not signed in right now. ";
   return {
     text: `${getCurrentPageHint(pathname)}${userHint}${best.answer}`,
@@ -168,13 +168,13 @@ export default function AiSupportChat() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      text: "Hi, I am CampusLove AI. Ask me anything about this web app."
+      text: "Hi, I am MDU CampusLove AI. Ask me anything about this web app."
     }
   ]);
 
   const routeLabel = useMemo(() => {
     const entry = siteKnowledge.find((item) => location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path)));
-    return entry?.title || "CampusLove";
+    return entry?.title || "MDU CampusLove";
   }, [location.pathname]);
 
   function ask(question) {
@@ -198,10 +198,10 @@ export default function AiSupportChat() {
   return (
     <div className="ai-chat">
       {open && (
-        <section className="ai-chat-panel" aria-label="CampusLove AI chat">
+        <section className="ai-chat-panel" aria-label="MDU CampusLove AI chat">
           <header className="ai-chat-header">
             <div>
-              <p>CampusLove AI</p>
+              <p>MDU CampusLove AI</p>
               <h2>Site help</h2>
             </div>
             <button className="ai-icon-btn" type="button" aria-label="Close AI chat" onClick={() => setOpen(false)}>

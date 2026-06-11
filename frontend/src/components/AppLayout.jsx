@@ -68,13 +68,13 @@ export default function AppLayout() {
 
   return (
     <SocketProvider>
-      <main className="min-h-screen bg-campus-paper pb-20 text-campus-ink lg:grid lg:grid-cols-[284px_1fr] lg:pb-0">
+      <main className="min-h-screen bg-campus-paper pb-[calc(4.75rem+env(safe-area-inset-bottom))] text-campus-ink lg:grid lg:grid-cols-[284px_1fr] lg:pb-0">
       <aside className="hidden border-b border-campus-line bg-white/95 p-4 shadow-sm lg:sticky lg:top-0 lg:block lg:min-h-screen lg:border-b-0 lg:border-r lg:p-5">
         <NavLink to="/swipe" className="mb-6 flex items-center gap-3 rounded-lg border border-campus-line bg-campus-paper p-3 transition hover:border-campus-teal">
           <img className="h-12 w-12 rounded-lg object-cover ring-2 ring-white" src={imageUrl(user?.profilePhoto)} alt={user?.name || "Profile"} />
           <div className="min-w-0">
             <p className="text-xs font-black uppercase text-campus-gold">Campus verified</p>
-            <h1 className="truncate text-xl font-black">{user?.name || "CampusLove"}</h1>
+            <h1 className="truncate text-xl font-black">{user?.name || "MDU CampusLove"}</h1>
           </div>
         </NavLink>
 
@@ -102,7 +102,7 @@ export default function AppLayout() {
               <UsersRound className="h-5 w-5" aria-hidden="true" />
             </span>
             <span className="min-w-0">
-              <span className="block text-[11px] font-black uppercase text-campus-gold">CampusLove</span>
+              <span className="block text-[11px] font-black uppercase text-campus-gold">MDU CampusLove</span>
               <span className="block truncate text-base font-black">{user?.name || "Swipe"}</span>
             </span>
           </NavLink>
@@ -167,7 +167,7 @@ export default function AppLayout() {
         </header>
         <Outlet />
       </section>
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-campus-line bg-white/95 px-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid h-[calc(4.25rem+env(safe-area-inset-bottom))] grid-cols-5 border-t border-campus-line bg-white/95 px-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
         {links.map(({ label, href, Icon }) => (
           <NavLink key={href} to={href} className={({ isActive }) => `mobile-tab ${isActive ? "active" : ""}`}>
             <Icon className="h-5 w-5" aria-hidden="true" />

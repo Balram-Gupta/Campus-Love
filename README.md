@@ -1,6 +1,6 @@
-# CampusLove
+# MDU CampusLove
 
-CampusLove is a university-only dating MVP built from the provided tech-stack document.
+MDU CampusLove is a university-only dating MVP built from the provided tech-stack document.
 
 ## Tech stack
 
@@ -123,7 +123,7 @@ Backend: `http://localhost:8000`
 ## Notes for production
 
 - On Render static frontend hosting, use the `render.yaml` rewrite route, or add the same rule in the Render Dashboard: source `/*`, destination `/index.html`, action `Rewrite`. This makes direct SPA routes such as `/login`, `/signup`, and `/chat/:matchId` serve `index.html`.
-- Backend email notifications use Mailjet SMTP through Nodemailer. Set `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, and `MAIL_FROM` in the deployed backend environment. `MAIL_FROM` must be a verified sender in Mailjet, for example `CampusLove <no-reply@yourdomain.com>`.
+- Backend email notifications use Mailjet SMTP through Nodemailer. Set `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, and `MAIL_FROM` in the deployed backend environment. `MAIL_FROM` must be a verified sender in Mailjet, for example `MDU CampusLove <no-reply@yourdomain.com>`.
 - Mailjet defaults to `in-v3.mailjet.com` on port `587`. You can override with `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` if needed.
 - Use HTTPS and secure cookies.
 - Store uploaded ID cards in private Cloudinary folders or private object storage.

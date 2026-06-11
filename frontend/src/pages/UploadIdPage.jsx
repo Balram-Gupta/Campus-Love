@@ -8,7 +8,7 @@ export default function UploadIdPage() {
           <p>Upload ID Page</p>
           <h1>Student ID upload is part of signup</h1>
           <span>
-            CampusLove requires a student ID card image and profile photo during signup.
+            MDU CampusLove requires a student ID card image and profile photo during signup.
             the admin dashboard reviews the ID card and approves or rejects the account.
           </span>
         </div>

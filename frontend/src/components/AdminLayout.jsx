@@ -17,7 +17,7 @@ export default function AdminLayout() {
           <span className="grid h-12 w-12 place-items-center rounded-lg bg-campus-gold font-black text-[#102825]">AD</span>
           <div>
             <p className="text-xs font-black uppercase text-[#d6b25f]">Admin console</p>
-            <h1 className="text-xl font-black">CampusLove</h1>
+            <h1 className="text-xl font-black">MDU CampusLove</h1>
           </div>
         </NavLink>
 

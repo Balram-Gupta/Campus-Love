@@ -22,7 +22,7 @@ export default function SignupPage() {
       <form className="panel max-w-4xl" onSubmit={submit}>
         <div className="section-title">
           <p>Signup Page</p>
-          <h1>Create your CampusLove profile</h1>
+          <h1>Create your MDU CampusLove profile</h1>
           <span>Submit your profile information for admin approval.</span>
         </div>
 

@@ -6,7 +6,7 @@ export default function LandingPage() {
       <section className="grid min-h-screen items-center gap-8 px-6 py-10 lg:grid-cols-[1fr_0.8fr] lg:px-16">
         <div className="max-w-3xl">
           <p className="text-xs font-black uppercase text-campus-gold">Verified university dating</p>
-          <h1 className="mt-3 text-5xl font-black leading-tight md:text-7xl">CampusLove</h1>
+          <h1 className="mt-3 text-5xl font-black leading-tight md:text-7xl">MDU CampusLove</h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-campus-muted">
             A campus-only dating MVP with profile signup, student ID verification, admin approval, swipe matching,
             real-time chat, reporting, blocking, and notifications.
